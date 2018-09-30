@@ -106,9 +106,9 @@ for (const client of allClients) {
 La subscripción de un serviceWorker genera una serviceWorkerRegistration.
 Se puede conseguir con `navigator.serviceWorker.getRegistration()` o con `navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {}`.
 El [serviceWorkerRegistration](https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration) tiene un objeto `pushManager`.
-El [PushMagager](https://developer.mozilla.org/en-US/docs/Web/API/PushManager) tiene un método `subscribe`. Antes se llamaba `register`.
-Mirar la opción `userVisibleOnly` pues puede condicionar el tipo de mensajes que el serviceWorker pueda recibir.  Por ahora parece obligatorio enviar un true o el browser dará un error.
-**No me queda claro si para hacer el `subscribe()` es necesario obtener primero un `Notification.permission === "granted"`.
+El [PushMagager](https://developer.mozilla.org/en-US/docs/Web/API/PushManager) tiene un método `subscribe`. Antes se llamaba `register`, ahora deprecado.
+Mirar la opción `userVisibleOnly` pues puede condicionar el tipo de mensajes que el serviceWorker pueda recibir.  Por ahora parece obligatorio enviar un `true o el browser dará un error.
+**No me queda claro si para hacer el `subscribe()` es necesario obtener primero un `Notification.permission === "granted"`**.
 
 ```
 serviceWorkerRegistration.pushManager
