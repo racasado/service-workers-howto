@@ -20,6 +20,14 @@ navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
 }
 ```
 
+#### avisa al resto de clientes
+Esto hay que entender mejor para qué...
+```
+self.addEventListener('activate', function(event) {
+  event.waitUntil(self.clients.claim());
+});
+```
+
 #### Force activation... or not
 Cuando una versión de serviceWorker sustituye a una antigua, tienen que esperar a que todas las páginas que utilizaban ese service worker se cierren.
 Alternativamente se puede forzar el refresco con `skipWaiting`.
@@ -35,8 +43,13 @@ self.addEventListener('install', function(event) {
 #### Mandar mensajes del service worker a los clientes
 ```
 // Desde el ServiceWorker
+var senderID = event.source.id;
+
 const allClients = await clients.matchAll();
 allClients.forEach(client => {
+  if (client.id === senderID) {
+    return;
+  }
   client.postMessage({type: 'update});
 });
 
@@ -177,6 +190,28 @@ serviceWorkerRegistration.pushManager
   applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
 })
 .then(state => {console.log('PushManager.permissionState()', state);});
+```
+
+#### Resubscribe after ubscription expires
+```
+self.addEventListener('pushsubscriptionchange', function(event) {
+  console.log('Subscription expired');
+  event.waitUntil(
+    self.registration.pushManager.subscribe({ userVisibleOnly: true })
+    .then(function(subscription) {
+      console.log('Subscribed after expiration', subscription.endpoint);
+      return fetch('register', {
+        method: 'post',
+        headers: {
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          endpoint: subscription.endpoint
+        })
+      });
+    })
+  );
+});
 ```
 
 ## Notifications
