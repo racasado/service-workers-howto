@@ -113,6 +113,42 @@ for (const client of allClients) {
 }
 ```
 
+#### Hacer algo recurrentemente
+```
+self.addEventListener('activate', function(event) {
+  setInterval(goforit, 5000);
+});
+
+function goforit() {
+  var LOG_ENDPOINT = 'https://api.finect.com/v3/test';
+  return fetch(LOG_ENDPOINT, {
+    method: 'POST',
+    body: JSON.stringify({}),
+    headers: { 'content-type': 'application/json' }
+  })
+}
+```
+
+### Interceptar las peticiones GET
+```
+addEventListener('fetch', event => {
+  if (event.request.method != 'GET') return;
+
+  self.clients.get(event.clientId).then(function(client) {
+    if(client) {
+      console.log(client.type);
+      console.log(client.url);
+    } else {
+      console.log('undefined');
+    }
+  });
+  console.log(event.request.url);
+  console.log(event.request);
+});
+```
+
+
+
 ## Subscription
 
 #### subscribirme a eventos push
@@ -266,10 +302,6 @@ navigator.serviceWorker.ready.then(function(registration) {
 });
 ```
 
-
-
-
-
 #### Make notification clickable
 ```
 // desde un script
@@ -285,10 +317,6 @@ self.addEventListener('notificationclick', function(event) {
   event.notification.close();
 });
 ```
-
-
-
-
 
 #### Listen to events from Notifications
 
@@ -322,8 +350,30 @@ self.addEventListener('notificationclick', function(event) {
   }));
 });
 ```
+## Cache
 
+#### Ver si algo está en la cache
+```
+addEventListener('fetch', event => {
+  if (event.request.method != 'GET') return;
 
+  event.respondWith(async function() {
+    // Try to get the response from a cache.
+    const cache = await caches.open('dynamic-v1');
+    const cachedResponse = await cache.match(event.request);
+
+    if (cachedResponse) {
+      event.waitUntil(cache.add(event.request));
+      return cachedResponse;
+    } else {
+      // aquí podríamos guardar en la cache
+    }
+
+    // If we didn't find a match in the cache, use the network.
+    return fetch(event.request);
+  }());
+});
+```
 
 
 
