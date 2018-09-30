@@ -157,6 +157,15 @@ self.addEventListener('push', function(event) {
   if (event.data) {
     data = event.data.json();
   }
+
+  event.waitUntil(
+    self.registration.showNotification('ServiceWorker Cookbook', {
+      lang: 'la',
+      body: 'Alea iacta est',
+      icon: 'caesar.jpg',
+      vibrate: [500, 100, 500],
+    })
+  );
 });
 ```
 
