@@ -6,7 +6,10 @@
 * Web Workers API: https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API
 
 
-#### Para escuchar un mensaje
+
+# Channel Messaging API
+
+#### Cómo escuchamos un mensaje en las píldoras
 
 ```
 var eventMethod = window.addEventListener ? 'addEventListener' : 'attachEvent';
