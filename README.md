@@ -129,7 +129,7 @@ function goforit() {
 }
 ```
 
-### Interceptar las peticiones GET
+#### Interceptar las peticiones GET
 ```
 addEventListener('fetch', event => {
   if (event.request.method != 'GET') return;
@@ -146,6 +146,97 @@ addEventListener('fetch', event => {
   console.log(event.request);
 });
 ```
+
+
+## Mandar mensajes
+
+#### Mandar un mensaje al service worker
+
+```
+navigator.serviceWorker.controller.postMessage("Client 1 says 'hola'");
+```
+
+#### Escuchar un mensaje desde el service worker
+
+```
+self.addEventListener('message', function(event){
+  console.log("SW Received Message: " + event.data);
+});
+```
+
+#### Para que el SW responda a un mensaje que le ha llegado
+
+El envío del mensaje
+```
+function send_message_to_sw(msg){#
+  return new Promise(function(resolve, reject){
+    // Create a Message Channel
+    var msg_chan = new MessageChannel();
+
+    // Handler for recieving message reply from service worker
+    msg_chan.port1.onmessage = function(event){
+      if(event.data.error){
+        reject(event.data.error);
+      } else {
+        resolve(event.data);
+      }
+    };
+
+    // Send message to service worker along with port for reply
+    navigator.serviceWorker.controller.postMessage("Client 1 says '"+msg+"'", [msg_chan.port2]);
+  });
+}
+```
+
+Y cómo responde el SW
+
+```
+self.addEventListener('message', function(event){
+  console.log("SW Received Message: " + event.data);
+  event.ports[0].postMessage("SW Says 'Hello back!'");
+});
+```
+
+#### Mandar un mensaje desde service worker
+
+```
+function send_message_to_client(client, msg){
+  return new Promise(function(resolve, reject){
+     var msg_chan = new MessageChannel();
+
+     msg_chan.port1.onmessage = function(event){
+     if(event.data.error){
+        reject(event.data.error);
+      } else {
+        resolve(event.data);
+      }
+    };
+
+    client.postMessage("SW Says: '"+msg+"'", [msg_chan.port2]);
+  });
+}
+
+function send_message_to_all_clients(msg){
+  clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      send_message_to_client(client, msg).then(m => console.log("SW Received Message: "+m));
+    })
+  })
+}
+
+send_message_to_all_clients('Hello')
+```
+
+#### Para escucher un mensaje que envía el SW
+
+```
+navigator.serviceWorker.addEventListener('message', function(event){
+  console.log("Client 1 Received Message: " + event.data);
+  event.ports[0].postMessage("Client 1 Says 'Hello back!'");
+});
+```
+
+
 
 
 
